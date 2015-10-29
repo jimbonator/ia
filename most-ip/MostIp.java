@@ -3,6 +3,12 @@
  *
  * Displays the top 'n' IPv4 addresses stored in a log file based on number of accesses.
  *
+ * The heart of this program is the process() method, which reads the file line-by-line, uses a
+ * simple regular expression to parse the IP address from the start of the line (which also provides
+ * basic verification of its format), and keeps count of the number of times seen via a Map of
+ * IP addresses to integers.  Then the Map is converted to a TreeSet of IpCount's, which sorts the
+ * addresses by the times seen.
+ *
  * Jim Nelson <jimbonator@gmail.com>
  */
 
@@ -12,22 +18,24 @@ import java.util.stream.*;
 import java.util.regex.*;
 
 public class MostIp extends Object {
+    public static final int TOP_COUNT = 10;
+    
     // Internal Comparable class associating an IPv4 address with the number of accesses counted
     // in the log file.
     private class IpCount extends Object implements Comparable<IpCount> {
         public final String ip;
-        public final int count;
+        public final int seen;
         
-        public IpCount(String ip, int count) {
+        public IpCount(String ip, int seen) {
             this.ip = ip;
-            this.count = count;
+            this.seen = seen;
         }
         
         // Sorts from highest to lowest, using the IPv4 addresses' lexiographic (not numeric!)
         // order to stabilize the sort.
         public int compareTo(IpCount other) {
-            // count is sorted in descending other
-            int cmp = other.count - count;
+            // seen is sorted in descending other
+            int cmp = other.seen - seen;
             if (cmp != 0)
                 return cmp;
             
@@ -48,12 +56,10 @@ public class MostIp extends Object {
     
     public static void main(String[] args) {
         File file;
-        int count;
         try {
             file = new File(args[0]);
-            count = Integer.decode(args[1]);
         } catch (Exception e) {
-            System.out.println("most-ip [file] [count]");
+            System.out.println("most-ip [file]");
             
             return;
         }
@@ -67,7 +73,7 @@ public class MostIp extends Object {
             return;
         }
         
-        most_ip.dumpTop(count, System.out);
+        most_ip.dumpTop(TOP_COUNT, System.out);
     }
     
     public MostIp(File file) {
@@ -102,28 +108,28 @@ public class MostIp extends Object {
             
             // If IP address present, increment its count, otherwise add it the first time with
             // an initial count
-            Integer count = iptable.get(ip);
-            iptable.put(ip, count != null ? count + 1 : 1);
+            Integer seen = iptable.get(ip);
+            iptable.put(ip, seen != null ? seen + 1 : 1);
         }
         
-        // Now populate the IpCount TreeSet, which will order each element by its count
+        // Now populate the TreeSet<IpCount>, which orders by seen count
         for (String ip : iptable.keySet())
             ipcounts.add(new IpCount(ip, iptable.get(ip)));
     }
     
     // Print the top 'n' IP addresses found in the file ... all ties within the top 'n' are printed
     private void dumpTop(int count, PrintStream pr) {
-        int lastCount = -1, pos = 0;
+        int lastSeen = -1, pos = 0;
         for (IpCount ipcount : ipcounts) {
             // if the seen count is not the same as the current, treat as a new position within the
             // top elements ... this ensures ties are dumped
-            if (lastCount != ipcount.count) {
-                lastCount = ipcount.count;
+            if (lastSeen != ipcount.seen) {
+                lastSeen = ipcount.seen;
                 if (++pos > count)
                     return;
             }
             
-            pr.printf("%d %s\n", ipcount.count, ipcount.ip);
+            pr.printf("%d %s\n", ipcount.seen, ipcount.ip);
         }
     }
 }
