@@ -1,0 +1,5 @@
+
+Each directory has its own Makefile and a shell script for executing the program.
+
+-- Jim Nelson <jimbonator@gmail.com>
+
