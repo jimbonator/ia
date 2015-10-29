@@ -1,6 +1,12 @@
 /**
  * http-ping
  *
+ * For this exercise I chose to use Sun's Java HTTP Server.  Most of the work for this exercise is
+ * located in the HttpPingHandler private class.
+ *
+ * For a larger application I wouldn't go this route; a full-blown Web framework would make more
+ * sense, especially if the application is backed by a database.
+ *
  * Jim Nelson <jimbonator@gmail.com>
  */
 
@@ -18,6 +24,7 @@ public class HttpPing extends Object {
             Headers headers = xchg.getResponseHeaders();
             headers.set("Content-Type", "text/plain; charset=" + Charset.defaultCharset().name());
             
+            // Date/time are emitted in UTC ISO-8601 format, remote address in dotted notation.
             byte[] resp = (
                 Clock.systemUTC().instant().toString()
                 + '\n'
