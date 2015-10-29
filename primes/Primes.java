@@ -36,11 +36,9 @@ public class Primes extends Object {
         
         // Create the sieve starting at index 2, storing discovered primes as encountered
         List<Integer> found = new ArrayList<Integer>();
-        for (int index = 2; index < sieve.length; index++) {
-            int candidate = sieve[index];
-            
+        for (int candidate = 2; candidate < sieve.length; candidate++) {
             // If the location's value is -1, it was earlier marked as composite
-            if (candidate == -1)
+            if (sieve[candidate] == -1)
                 continue;
             
             // add to final list of primes
