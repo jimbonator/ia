@@ -18,15 +18,15 @@ public class HttpPing extends Object {
             Headers headers = xchg.getResponseHeaders();
             headers.set("Content-Type", "text/plain; charset=" + Charset.defaultCharset().name());
             
-            byte[] bytes = (
+            byte[] resp = (
                 Clock.systemUTC().instant().toString()
                 + '\n'
                 + xchg.getRemoteAddress().getAddress().getHostAddress().toString()
                 + '\n'
                 ).getBytes();
             
-            xchg.sendResponseHeaders(HttpURLConnection.HTTP_OK, bytes.length);
-            xchg.getResponseBody().write(bytes);
+            xchg.sendResponseHeaders(HttpURLConnection.HTTP_OK, resp.length);
+            xchg.getResponseBody().write(resp);
             
             xchg.close();
         }
@@ -41,7 +41,7 @@ public class HttpPing extends Object {
         } catch (IOException ioe) {
             System.err.println(ioe.toString());
         } catch (Exception e) {
-            System.out.println("http-ping [port]");
+            System.out.println("http-ping [listen-port]");
         }
     }
     
@@ -54,7 +54,7 @@ public class HttpPing extends Object {
         server.createContext("/", new HttpPingHandler());
         server.setExecutor(null);
         
-        System.out.println("Starting server...");
+        System.out.printf("Starting server, listening on port %d...\n", localAddr.getPort());
         server.start();
     }
 }

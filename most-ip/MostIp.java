@@ -12,10 +12,8 @@ import java.util.stream.*;
 import java.util.regex.*;
 
 public class MostIp extends Object {
-    /**
-     * Internal Comparable class associating an IPv4 address with the number of accesses counted
-     * in the log file.
-     */
+    // Internal Comparable class associating an IPv4 address with the number of accesses counted
+    // in the log file.
     private class IpCount extends Object implements Comparable<IpCount> {
         public final String ip;
         public final int count;
@@ -25,10 +23,8 @@ public class MostIp extends Object {
             this.count = count;
         }
         
-        /**
-         * Sorts from highest to lowest, using the IPv4 addresses' lexiographic (not numeric!)
-         * order to stabilize the sort.
-         */
+        // Sorts from highest to lowest, using the IPv4 addresses' lexiographic (not numeric!)
+        // order to stabilize the sort.
         public int compareTo(IpCount other) {
             // count is sorted in descending other
             int cmp = other.count - count;
@@ -40,22 +36,29 @@ public class MostIp extends Object {
         }
     }
     
-    // Basic IPv4 regular expression ... address must be first on the line with all 4 fields
-    // listed.  This does not cover IPv6 nor does it verify that each class of the address is
-    // within proper range.
+    // Basic IPv4 regular expression ... address must be first on the line with all 4 dotted fields
+    // listed and whitespace after the last numeral.
+    //
+    // This does not cover IPv6 nor does it verify that each class of the address is within proper
+    // range.
     private static final Pattern regex = Pattern.compile("^(\\d{1,3}\\.){3}\\d{1,3}\\h");
     
     private final File file;
     private final TreeSet<IpCount> ipcounts = new TreeSet<IpCount>();
     
     public static void main(String[] args) {
-        if (args.length != 2) {
-            help();
+        File file;
+        int count;
+        try {
+            file = new File(args[0]);
+            count = Integer.decode(args[1]);
+        } catch (Exception e) {
+            System.out.println("most-ip [file] [count]");
             
             return;
         }
         
-        MostIp most_ip = new MostIp(new File(args[0]));
+        MostIp most_ip = new MostIp(file);
         try {
             most_ip.run();
         } catch (Exception e) {
@@ -64,18 +67,14 @@ public class MostIp extends Object {
             return;
         }
         
-        most_ip.dumpTop(Integer.decode(args[1]), System.out);
-    }
-    
-    private static void help() {
-        System.out.println("most-ip [file] [count]");
+        most_ip.dumpTop(count, System.out);
     }
     
     public MostIp(File file) {
         this.file = file;
     }
     
-    public void run() throws Exception {
+    public void run() throws IOException {
         BufferedReader reader = new BufferedReader(new FileReader(file));
         try {
             process(reader);
@@ -85,7 +84,7 @@ public class MostIp extends Object {
     }
     
     // Read the file one line at a time, processing each line and preparing the ipcounts table
-    private void process(BufferedReader reader) throws Exception {
+    private void process(BufferedReader reader) throws IOException {
         HashMap<String, Integer> iptable = new HashMap<String, Integer>();
         
         // For each line, match IPv4 address at start of line and add it to iptable, which maps
@@ -116,7 +115,8 @@ public class MostIp extends Object {
     private void dumpTop(int count, PrintStream pr) {
         int lastCount = -1, pos = 0;
         for (IpCount ipcount : ipcounts) {
-            // if the seen count has changed, treat as a new position within the top elements
+            // if the seen count is not the same as the current, treat as a new position within the
+            // top elements ... this ensures ties are dumped
             if (lastCount != ipcount.count) {
                 lastCount = ipcount.count;
                 if (++pos > count)

@@ -10,17 +10,21 @@ import java.util.*;
 
 public class Primes extends Object {
     public static void main(String[] args) {
-        if (args.length != 1)
+        int max;
+        try {
+            max = Integer.decode(args[0]);
+        } catch (Exception e) {
+            System.out.println("primes [max]");
+            
             return;
+        }
         
-        List<Integer> found = primes(Integer.decode(args[0]));
+        List<Integer> found = primes(max);
         if (found == null)
             return;
         
         for (int prime : found)
-            System.out.printf("%d ", prime);
-        
-        System.out.println();
+            System.out.println(prime);
     }
     
     private static List<Integer> primes(int max) {
