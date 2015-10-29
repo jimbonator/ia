@@ -27,25 +27,28 @@ public class Primes extends Object {
         if (max <= 1)
             return null;
         
-        // Allocate the sieve to hold [2...max] values and initialize every location with its value
-        // Note that the mapping of value -> array index requires subtracting by 2
-        int[] sieve = new int[max - 1];
-        for (int value = 2; value <= max; value++)
-            sieve[value - 2] = value;
+        // Allocate the sieve to hold every values from 0 to max and initialize every location with
+        // its index value ... although this is a tad wasteful (locs 0 and 1 are skipped), it
+        // simplifies indexing, as the index is always equal to the value stored there
+        int[] sieve = new int[max + 1];
+        for (int index = 0; index < sieve.length; index++)
+            sieve[index] = index;
         
-        // Create the sieve
+        // Create the sieve starting at index 2, storing discovered primes as encountered
         List<Integer> found = new ArrayList<Integer>();
-        for (int candidate = 2; candidate <= max; candidate++) {
-            // If the location is a positive int, it's prime; if marked with -1, it's composite
-            if (sieve[candidate - 2] == -1)
+        for (int index = 2; index < sieve.length; index++) {
+            int candidate = sieve[index];
+            
+            // If the location's value is -1, it was earlier marked as composite
+            if (candidate == -1)
                 continue;
             
             // add to final list of primes
             found.add(candidate);
             
-            // mark all multiples of this value as composite
-            for (int composite = candidate * 2; composite <= max; composite += candidate)
-                sieve[composite - 2] = -1;
+            // mark all multiples of the prime as composite
+            for (int composite = candidate * 2; composite < sieve.length; composite += candidate)
+                sieve[composite] = -1;
         }
         
         return found;
