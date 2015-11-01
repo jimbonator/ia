@@ -3,6 +3,6 @@
 echo "Listening on port 8888...";
 while true;
 do
-    nc -l -p 8888 -v -c 'echo "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n"; date; grep -o "from.*" nc.msg | grep -o -E "([0-9]{1,3}.){3}[0-9]{1,3}"' 2> nc.msg;
+    nc -l -p 8888 -v -c 'while read -r REQ && [ ${#REQ} -gt 2 ]; do true; done; echo "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n"; date; grep -o "from.*" nc.msg | grep -o -E "([0-9]{1,3}.){3}[0-9]{1,3}"' 2> nc.msg;
 done
 
