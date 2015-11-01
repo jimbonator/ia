@@ -1,4 +1,6 @@
 #!/bin/sh
+#
+# This requires the "traditional" nc (with -c support) and not the OpenBSD version.
 
 echo "Listening on port 8888...";
 while true;
